@@ -1,4 +1,3 @@
-
 import Main.getSparkSession
 import TransformerModel.MyTransformer
 import org.apache.spark.ml.Estimator

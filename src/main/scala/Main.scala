@@ -1,15 +1,14 @@
 
-import EstimatorModel.{ MyEstimator}
+import EstimatorModel.{MyEstimator}
 import TransformerModel.MyTransformer
-import org.apache.spark.sql.{ DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.ml.feature.StringIndexer
-
 
 
 object Main {
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = getSparkSession
-    val all_collumns:Seq[String] = Seq("MinTemp", "MaxTemp", "Rainfall", "WindGustSpeed"
+    val all_collumns: Seq[String] = Seq("MinTemp", "MaxTemp", "Rainfall", "WindGustSpeed"
       , "WindSpeed9am", "WindSpeed3pm", "Humidity9am", "Humidity3pm",
       "Pressure9am", "Pressure3pm", "Cloud9am", "Cloud3pm", "Temp9am", "Temp3pm", "RainTodayIndex", "RISK_MM",
       "RainTomorrowIndex")
@@ -56,7 +55,7 @@ object Main {
     //datasetWithDroppedCol.printSchema()
 
 
-    /***("MY TRANSFORMER")***/
+    /** *("MY TRANSFORMER") ***/
 
     var myData = datasetWithDroppedCol
     val myTransformer = new MyTransformer("myTransformer")
@@ -76,6 +75,7 @@ object Main {
     }
     println(" Metadata for all columns")
     myData.schema.foreach(field => println(s"${field.name}: metadata=${field.metadata}"))
+
     /**
       *myData.map { line => {
       * val r = line.asInstanceOf[DataFrame]
@@ -146,7 +146,8 @@ object Main {
 
     DoubleData
   }
-  def readTestData(spark: SparkSession,name:String): DataFrame = {
+
+  def readTestData(spark: SparkSession, name: String): DataFrame = {
     val data = spark.read
       .option("delimiter", ",")
       .option("inferSchema", "true")

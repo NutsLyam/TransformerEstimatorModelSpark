@@ -12,9 +12,9 @@ class TransformerEstimatorTest extends FunSuite {
     val colName = "data"
     val press = 0.001
     val fileName = "testData.csv"
-    val Data: DataFrame = readTestData(spark,fileName).
-      select(colName, "target", "max", "min", "mean", "std","quantile_10",
-        "median","quantile_90","quantile_99","distinct","cor_pearson","cor_spearman")
+    val Data: DataFrame = readTestData(spark, fileName).
+      select(colName, "target", "max", "min", "mean", "std", "quantile_10",
+        "median", "quantile_90", "quantile_99", "distinct", "cor_pearson", "cor_spearman")
 
     Data.show()
     Data.printSchema()
@@ -57,7 +57,6 @@ class TransformerEstimatorTest extends FunSuite {
     assert(abs(myDataWithMeta.schema(colName).metadata.getDouble("cor_spearman") - cor_spearman) < press)
 
 
-
-}
+  }
 
 }

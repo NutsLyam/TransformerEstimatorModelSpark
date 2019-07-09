@@ -1,22 +1,21 @@
 import EstimatorModel.MyParams
 import org.apache.spark.ml.{Model, Transformer}
-import org.apache.spark.sql.{ DataFrame, Dataset}
+import org.apache.spark.sql.{DataFrame, Dataset}
 import org.apache.spark.sql.types.{DataTypes, StructType}
 import org.apache.spark.ml.param.{Param, ParamMap}
 import org.apache.spark.sql
 
 
 object TransformerModel {
-//trait Model[MyTransformer]
+
 
   class MyTransformer(override val uid: String) extends Model[MyTransformer]
-    with MyParams
-     {
+    with MyParams {
     override def transform(dataset: Dataset[_]): DataFrame = {
 
       val data: DataFrame = dataset.toDF()
       //add metadata
-      val m  = $(metadataCol)
+      val m = $(metadataCol)
 
       val metadata = new sql.types.MetadataBuilder()
         .putDouble("max", m._max)
@@ -35,8 +34,8 @@ object TransformerModel {
 
       val colWithMeta = data.col($(estimatedCol)).as($(estimatedCol), metadata)
 
-      val returnData = data.withColumn($(estimatedCol),colWithMeta)
-     // returnData.schema.foreach(field => println(s"${field.name}: metadata=${field.metadata}"))
+      val returnData = data.withColumn($(estimatedCol), colWithMeta)
+      // returnData.schema.foreach(field => println(s"${field.name}: metadata=${field.metadata}"))
       returnData
     }
 
