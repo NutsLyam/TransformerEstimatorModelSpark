@@ -1,0 +1,7 @@
+Data,target,max,min,mean,std,quantile_10,median,quantile_90,quantile_99,distinct,cor_pearson,cor_spearman
+1.0,0.0,3.0,0.0,1.5,1.048,0.0,1.0,3.0,3.0,4.0,-0.174,-0.2011
+2.0,0.0
+3.0,1.0
+0.0,1.0
+2.0,0.0
+1.0,1.0
