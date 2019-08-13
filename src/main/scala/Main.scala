@@ -1,8 +1,10 @@
 
-import EstimatorModel.{MyEstimator}
-import TransformerModel.MyTransformer
+//import MyEstimator
+//import TransformerModel.MyTransformer
+import org.apache.spark.ml.attribute.AttributeGroup
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.ml.feature.StringIndexer
+import org.apache.spark.sql.types.{DataTypes, DoubleType, StructField, StructType}
 
 
 object Main {
@@ -14,21 +16,17 @@ object Main {
       "RainTomorrowIndex")
 
     val data = readData(spark).
-      select("MinTemp", "MaxTemp", "Rainfall", "WindGustSpeed", "WindSpeed9am",
-        "WindSpeed3pm", "Humidity9am", "Humidity3pm",
-        "Pressure9am", "Pressure3pm", "Cloud9am", "Cloud3pm", "Temp9am", "Temp3pm", "RainToday", "RISK_MM",
+      select("MinTemp", "MaxTemp", "Rainfall", "WindGustSpeed", "RainToday",
         "RainTomorrow")
-    //data.show()
-    // data.printSchema()
 
+    /** "WindSpeed3pm", "Humidity9am", "Humidity3pm",
+      * "Pressure9am", "Pressure3pm", "Cloud9am", "Cloud3pm", "Temp9am", "Temp3pm", "RainToday", "RISK_MM",
+      * "RainTomorrow")
+      * */
 
     val DataDoubled = readDataToDoubles(spark).
-      select("MinTemp", "MaxTemp", "Rainfall", "WindGustSpeed", "WindSpeed9am",
-        "WindSpeed3pm", "Humidity9am", "Humidity3pm",
-        "Pressure9am", "Pressure3pm", "Cloud9am", "Cloud3pm", "Temp9am", "Temp3pm", "RainToday", "RISK_MM",
+      select("MinTemp", "MaxTemp", "Rainfall", "WindGustSpeed", "RainToday",
         "RainTomorrow")
-    // DataDoubled.show()
-    //DataDoubled.printSchema()
 
     val target_col = "RainTomorrowIndex"
     val IndexerToday = new StringIndexer()
@@ -49,8 +47,9 @@ object Main {
       fit(DataDoubledToday).
       transform(DataDoubledToday)
 
-    val dropTransformer = new TransformerModel.DropRainColumns("dropTransformer")
-    val datasetWithDroppedCol = dropTransformer.transform(dataset)
+
+    val datasetWithDroppedCol = dataset.
+      drop("RainTomorrow", "RainToday")
     //datasetWithDroppedCol.show()
     //datasetWithDroppedCol.printSchema()
 
@@ -60,34 +59,25 @@ object Main {
     var myData = datasetWithDroppedCol
     val myTransformer = new MyTransformer("myTransformer")
 
-
     val selectColumns = myData.columns.toSeq
     for (colName <- selectColumns) {
       val estimator = new MyEstimator("myEstimator")
         .setTargetCol("RainTomorrowIndex")
         .setEstimatedCol(colName)
 
+
+      ////
       val transformer = estimator.fit(myData)
       // column with meta
       myData = transformer.transform(myData)
-
+      println(transformer.transformSchema(myData.schema))
 
     }
-    println(" Metadata for all columns")
-    myData.schema.foreach(field => println(s"${field.name}: metadata=${field.metadata}"))
 
-    /**
-      *myData.map { line => {
-      * val r = line.asInstanceOf[DataFrame]
-      * val name = r.columns.toSeq(0)
-      * myTransformer
-      * .transform(r).col(name)
-      * }
-      * }(???)
-      * *
-      * println("my data ", myData)
-      *myData.show(10)
-      **/
+    println("Metadata for all columns")
+    myData.schema.foreach(field => println(s"${field.name}: metadata=${field.metadata}"))
+    myData.printSchema()
+
   }
 
 

@@ -1,62 +1,51 @@
-import EstimatorModel.MyParams
-import org.apache.spark.ml.{Model, Transformer}
+
+import org.apache.spark.ml.{Model}
 import org.apache.spark.sql.{DataFrame, Dataset}
-import org.apache.spark.sql.types.{DataTypes, StructType}
+import org.apache.spark.sql.types.{DataTypes, IntegerType, StructField, StructType}
 import org.apache.spark.ml.param.{Param, ParamMap}
-import org.apache.spark.sql
 
 
-object TransformerModel {
+class MyTransformer(override val uid: String) extends Model[MyTransformer]
+  with MyParams {
+  override def transform(dataset: Dataset[_]): DataFrame = {
 
+    val data: DataFrame = dataset.toDF()
 
-  class MyTransformer(override val uid: String) extends Model[MyTransformer]
-    with MyParams {
-    override def transform(dataset: Dataset[_]): DataFrame = {
+    val metadata = $(metadataCol).putMetadata()
 
-      val data: DataFrame = dataset.toDF()
-      //add metadata
-      val m = $(metadataCol)
+    val colWithMeta = data.col($(estimatedCol)).as($(estimatedCol), metadata)
 
-      val metadata = new sql.types.MetadataBuilder()
-        .putDouble("max", m._max)
-        .putDouble("min", m._min)
-        .putDouble("mean", m._mean)
-        .putDouble("std", m._std)
-        .putDouble("quantile_10", m._q10)
-        .putDouble("median", m._median)
-        .putDouble("quantile_90", m._q90)
-        .putDouble("quantile_99", m._q99)
-        .putDouble("cor_pearson", m._pearson_cor)
-        .putDouble("cor_spearman", m._spearman_cor)
-        .putDouble("distinct", m._dist_value)
-        .build()
-
-
-      val colWithMeta = data.col($(estimatedCol)).as($(estimatedCol), metadata)
-
-      val returnData = data.withColumn($(estimatedCol), colWithMeta)
-      // returnData.schema.foreach(field => println(s"${field.name}: metadata=${field.metadata}"))
-      returnData
-    }
-
-
-    override def transformSchema(schema: StructType): StructType = schema //
-
-    override def copy(extra: ParamMap): MyTransformer = defaultCopy(extra)
+    val returnData = data.withColumn($(estimatedCol), colWithMeta)
+    // returnData.schema.foreach(field => println(s"${field.name}: metadata=${field.metadata}"))
+    returnData
   }
 
-  class DropRainColumns(override val uid: String) extends Transformer {
 
-    override def transform(dataset: Dataset[_]): DataFrame = {
-      val result = dataset.drop("RainTomorrow", "RainToday")
-      println("Columns RainTomorrow is deleted")
-      //result.show()
-      result
-    }
+  override def transformSchema(schema: StructType): StructType = {
 
-    override def copy(extra: ParamMap): DropRainColumns = null //defaultCopy(extra)
+    val actualColumnDataType = schema($(estimatedCol)).dataType
+    require(actualColumnDataType.equals(DataTypes.DoubleType),
+      s"Column ${$(estimatedCol)} must be StringType but was actually $actualColumnDataType .")
 
-    override def transformSchema(schema: StructType): StructType = schema
+    require(schema($(estimatedCol)).metadata.contains("max"),
+      s"Column ${$(estimatedCol)}  did not have metadata.")
+
+    //val meta = new MetadataClass().getClassMetadata(field.metadata)
+
+    StructType(schema.fields ++ Seq(StructField("max", DataTypes.DoubleType, true),
+      StructField("min", DataTypes.DoubleType, true),
+      StructField("mean", DataTypes.DoubleType, true),
+      StructField("std", DataTypes.DoubleType, true),
+      StructField("quantile_10", DataTypes.DoubleType, true),
+      StructField("meduan", DataTypes.DoubleType, true),
+      StructField("quantile_90", DataTypes.DoubleType, true),
+      StructField("quantile_99", DataTypes.DoubleType, true),
+      StructField("cor_pearson", DataTypes.DoubleType, true),
+      StructField("cor_pearson", DataTypes.DoubleType, true),
+      StructField("distinct", DataTypes.DoubleType, false)))
   }
+
+  override def copy(extra: ParamMap): MyTransformer = defaultCopy(extra)
+
 
 }
