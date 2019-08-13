@@ -1,6 +1,4 @@
-import EstimatorModel.MyEstimator
 import Main.{getSparkSession, readTestData}
-import TransformerModel.MyTransformer
 import breeze.numerics.abs
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.FunSuite

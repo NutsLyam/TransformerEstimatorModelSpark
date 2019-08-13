@@ -1,6 +1,4 @@
 
-//import MyEstimator
-//import TransformerModel.MyTransformer
 import org.apache.spark.ml.attribute.AttributeGroup
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.ml.feature.StringIndexer
